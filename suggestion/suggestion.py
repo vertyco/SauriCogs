@@ -547,18 +547,20 @@ class Suggestion(commands.Cog):
         # server suggestions
         if message.channel.id == await self.config.guild(message.guild).suggest_id():
             for message_reaction in message.reactions:
+                users = [u async for u in message_reaction.users()]
                 if (
                     message_reaction.emoji != reaction.emoji
-                    and user in await message_reaction.users().flatten()
+                    and user in users
                 ):
                     await message_reaction.remove(user)
 
         # global suggestions
         if message.channel.id == await self.config.channel_id():
             for message_reaction in message.reactions:
+                users = [u async for u in message_reaction.users()]
                 if (
                     message_reaction.emoji != reaction.emoji
-                    and user in await message_reaction.users().flatten()
+                    and user in users
                 ):
                     await message_reaction.remove(user)
 
