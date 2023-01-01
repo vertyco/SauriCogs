@@ -94,10 +94,12 @@ class Suggestion(commands.Cog):
                 "Uh oh, looks like the Admins haven't added the required channel."
             )
         embed = discord.Embed(color=await ctx.embed_colour(), description=suggestion, title="New suggestion")
+        icon = ctx.guild.icon.url if ctx.guild.icon else None
+        pfp = ctx.author.avatar.url if ctx.author.avatar else None
         if is_anonymous:
-            footer = [f"Suggested in {ctx.guild.name} ({ctx.guild.id})", ctx.guild.icon_url]
+            footer = [f"Suggested in {ctx.guild.name} ({ctx.guild.id})", icon]
         else:
-            footer = [f"Suggested by {ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id})", ctx.author.avatar_url]
+            footer = [f"Suggested by {ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id})", pfp]
         embed.set_footer(
             text=footer[0],
             icon_url=footer[1]
@@ -603,7 +605,7 @@ class Suggestion(commands.Cog):
             title=atext,
         )
         if is_anonymous:
-            footer = [f"Suggested in {suggested_in_guild.name} ({suggested_in_guild.id})", suggested_in_guild.icon_url]
+            footer = [f"Suggested in {suggested_in_guild.name} ({suggested_in_guild.id})", suggested_in_guild.icon.url if suggested_in_guild.icon else None]
         else:
             footer = [f"Suggested by {op_name}#{op_discriminator} ({op_id})", op_avatar]
         embed.set_footer(
@@ -649,11 +651,11 @@ class Suggestion(commands.Cog):
         if op:
             op_name = op.name
             op_discriminator = op.discriminator
-            op_avatar = op.avatar_url
+            op_avatar = op.avatar.url if op.avatar else None
         else:
             op_name = op_info[1]
             op_discriminator = op_info[2]
-            op_avatar = ctx.guild.icon_url
+            op_avatar = ctx.guild.icon.url if ctx.guild.icon else None
 
         return op, op_name, op_discriminator, op_id, op_avatar
 
