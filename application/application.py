@@ -15,7 +15,7 @@ class Application(commands.Cog):
     Receive and moderate staff applications with customizable questions.
     """
 
-    __version__ = "1.4.0"
+    __version__ = "1.4.1"
 
     def __init__(self, bot: Red):
         self.bot = bot
@@ -101,7 +101,8 @@ class Application(commands.Cog):
         embed = discord.Embed(
             color=await ctx.embed_colour(), timestamp=datetime.datetime.now()
         )
-        embed.set_author(name="New application!", icon_url=ctx.author.avatar_url)
+        pfp = ctx.author.avatar.url if ctx.author.avatar else None
+        embed.set_author(name="New application!", icon_url=pfp)
         embed.set_footer(
             text=f"{ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id})"
         )
@@ -284,7 +285,8 @@ class Application(commands.Cog):
         embed = discord.Embed(
             colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
         )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        icon = ctx.guild.icon.url if ctx.guild.icon else None
+        embed.set_author(name=ctx.guild.name, icon_url=icon)
         embed.set_footer(text="*required to function properly")
 
         embed.title = "**__Application settings:__**"

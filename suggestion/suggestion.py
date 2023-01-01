@@ -13,7 +13,7 @@ class Suggestion(commands.Cog):
     Per guild, as well as global, suggestion box voting system.
     """
 
-    __version__ = "1.7.1"
+    __version__ = "1.7.2"
 
     def __init__(self, bot: Red):
         self.bot = bot
@@ -396,7 +396,8 @@ class Suggestion(commands.Cog):
         embed = discord.Embed(
             colour=await ctx.embed_colour()
         )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        icon = ctx.guild.icon.url if ctx.guild.icon else None
+        embed.set_author(name=ctx.guild.name, icon_url=icon)
         embed.title = "**__Suggestion settings (guild):__**"
 
         embed.set_footer(text="*required to function properly")
@@ -524,7 +525,8 @@ class Suggestion(commands.Cog):
         embed = discord.Embed(
             colour=await ctx.embed_colour()
         )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        icon = ctx.guild.icon.url if ctx.guild.icon else None
+        embed.set_author(name=ctx.guild.name, icon_url=icon)
         embed.title = "**__Suggestion settings (global):__**"
 
         embed.set_footer(text="*required to function properly")
@@ -645,7 +647,8 @@ class Suggestion(commands.Cog):
 
     async def _get_op_info(self, ctx, op_info):
         if len(op_info) == 0:
-            return None, "Unknown", 0000, 0000000000000000000, ctx.guild.icon_url
+            icon = ctx.guild.icon.url if ctx.guild.icon else None
+            return None, "Unknown", 0000, 0000000000000000000, icon
         op_id = op_info[0]
         op = await self.bot.fetch_user(op_id)
         if op:
@@ -682,6 +685,7 @@ class Suggestion(commands.Cog):
                 server, old_channel = await self._check_global(ctx)
             except TypeError:
                 return
+            channel = None
         else:
             server = ctx.guild.id
             is_anonymous = await self.config.guild(ctx.guild).anonymous()
@@ -723,7 +727,8 @@ class Suggestion(commands.Cog):
 
         embed.title = f"{approved} suggestion"
         if is_anonymous:
-            footer = [f"Suggested in {suggested_in_guild.name} ({suggested_in_guild.id})", suggested_in_guild.icon_url]
+            icon = suggested_in_guild.icon.url if suggested_in_guild.icon else None
+            footer = [f"Suggested in {suggested_in_guild.name} ({suggested_in_guild.id})", icon]
         else:
             footer = [f"Suggested by {op_name}#{op_discriminator} ({op_id})", op_avatar]
         embed.set_footer(
