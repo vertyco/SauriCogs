@@ -1,14 +1,13 @@
-import discord
 import asyncio
-import random
 import datetime
+import random
 import typing
 
-from redbot.core import Config, checks, commands, bank
-from redbot.core.utils.chat_formatting import humanize_list, box
-from redbot.core.utils.predicates import MessagePredicate
-
+import discord
+from redbot.core import Config, bank, checks, commands
 from redbot.core.bot import Red
+from redbot.core.utils.chat_formatting import box, humanize_list
+from redbot.core.utils.predicates import MessagePredicate
 
 
 class Marriage(commands.Cog):
@@ -20,9 +19,7 @@ class Marriage(commands.Cog):
 
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=5465461324979524, force_registration=True
-        )
+        self.config = Config.get_conf(self, identifier=5465461324979524, force_registration=True)
         default_user = {
             "married": False,
             "current": [],
@@ -162,9 +159,7 @@ class Marriage(commands.Cog):
         await ctx.send(f"Marriage is now {'global' if make_global else 'per-guild'}.")
 
     @marryset.command(name="toggle")
-    async def marryset_toggle(
-        self, ctx: commands.Context, on_off: typing.Optional[bool]
-    ):
+    async def marryset_toggle(self, ctx: commands.Context, on_off: typing.Optional[bool]):
         """Toggle Marriage.
 
         If `on_off` is not provided, the state will be flipped."""
@@ -185,9 +180,7 @@ class Marriage(commands.Cog):
             if currency != 1:
                 return await ctx.send("Uh oh, currency can only be 0 or 1.")
             if not self.bot.get_cog("Cookies"):
-                return await ctx.send(
-                    f"Uh oh, Cookies isn't loaded. Load it using `{ctx.clean_prefix}load cookies`"
-                )
+                return await ctx.send(f"Uh oh, Cookies isn't loaded. Load it using `{ctx.clean_prefix}load cookies`")
         conf = await self._get_conf_group(ctx.guild)
         await conf.currency.set(currency)
         await ctx.tick()
@@ -232,18 +225,10 @@ class Marriage(commands.Cog):
         """See current settings."""
         is_global = await self.config.is_global()
         conf = await self._get_conf_group(ctx.guild)
-        data = (
-            await self.config.all()
-            if is_global
-            else await self.config.guild(ctx.guild).all()
-        )
-        currency_used = (
-            "Red's economy" if data["currency"] == 0 else "SauriCogs' cookies"
-        )
+        data = await self.config.all() if is_global else await self.config.guild(ctx.guild).all()
+        currency_used = "Red's economy" if data["currency"] == 0 else "SauriCogs' cookies"
 
-        actions_keys, gifts_keys = await self._get_actions(ctx), await self._get_gifts(
-            ctx
-        )
+        actions_keys, gifts_keys = await self._get_actions(ctx), await self._get_gifts(ctx)
 
         custom_actions = await conf.custom_actions()
         custom_gifts = await conf.custom_gifts()
@@ -281,10 +266,8 @@ class Marriage(commands.Cog):
                         f"{self._DEFAULT_GIFTS.get(key).get('price')} price\n"
                     )
 
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__Marriage settings:__**"
         embed.add_field(name="Global:", value=str(is_global))
         embed.add_field(name="Enabled*:", value=str(data["toggle"]))
@@ -389,9 +372,7 @@ description:: {data.get('description')}""",
         """Custom gifts"""
 
     @marryset_gifts.command(name="add")
-    async def marryset_gifts_add(
-        self, ctx: commands.Context, gift: str, contentment: int, price: int
-    ):
+    async def marryset_gifts_add(self, ctx: commands.Context, gift: str, contentment: int, price: int):
         """Add a custom gift.
 
         Available parameters are `{author}` and `{target}`"""
@@ -401,9 +382,7 @@ description:: {data.get('description')}""",
             return await ctx.send("Uh oh, that's already a registered gift.")
 
         conf = await self._get_conf_group(ctx.guild)
-        await conf.custom_gifts.set_raw(
-            gift, value={"contentment": contentment, "price": price}
-        )
+        await conf.custom_gifts.set_raw(gift, value={"contentment": contentment, "price": price})
         await ctx.tick()
 
     @marryset_gifts.command(name="remove")
@@ -455,9 +434,7 @@ price:: {data.get('price')}""",
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    async def about(
-        self, ctx: commands.Context, member: typing.Optional[discord.Member]
-    ):
+    async def about(self, ctx: commands.Context, member: typing.Optional[discord.Member]):
         """Display your or someone else's about"""
         conf = await self._get_conf_group(ctx.guild)
         if not await conf.toggle():
@@ -511,15 +488,13 @@ price:: {data.get('price')}""",
         for gift in gifts:
             amount = gifts.get(gift)
             if amount > 0:
-                textos = (
-                    f"{gift} - {amount} pc" if amount == 1 else f"{gift} - {amount} pcs"
-                )
+                textos = f"{gift} - {amount} pc" if amount == 1 else f"{gift} - {amount} pcs"
                 giftos.append(textos)
         gift_text = "None" if giftos == [] else humanize_list(giftos)
         e = discord.Embed(colour=member.color)
-        e.set_author(name=f"{member.name}'s Profile", icon_url=member.avatar_url)
+        e.set_author(name=f"{member.name}'s Profile", icon_url=member.display_avatar)
         e.set_footer(text=f"{member.name}#{member.discriminator} ({member.id})")
-        e.set_thumbnail(url=member.avatar_url)
+        e.set_thumbnail(url=member.display_avatar)
         e.add_field(name="About:", value=await m_conf.about(), inline=False)
         e.add_field(name="Status:", value=rs_status)
         if is_married:
@@ -550,9 +525,7 @@ price:: {data.get('price')}""",
 
     @commands.guild_only()
     @commands.command()
-    async def exes(
-        self, ctx: commands.Context, member: typing.Optional[discord.Member]
-    ):
+    async def exes(self, ctx: commands.Context, member: typing.Optional[discord.Member]):
         """Display your or someone else's exes."""
         conf = await self._get_conf_group(ctx.guild)
         if not await conf.toggle():
@@ -571,9 +544,7 @@ price:: {data.get('price')}""",
 
     @commands.guild_only()
     @commands.command()
-    async def spouses(
-        self, ctx: commands.Context, member: typing.Optional[discord.Member]
-    ):
+    async def spouses(self, ctx: commands.Context, member: typing.Optional[discord.Member]):
         """Display your or someone else's spouses."""
         conf = await self._get_conf_group(ctx.guild)
         if not await conf.toggle():
@@ -600,9 +571,7 @@ price:: {data.get('price')}""",
 
     @commands.guild_only()
     @commands.command()
-    async def crush(
-        self, ctx: commands.Context, member: typing.Optional[discord.Member]
-    ):
+    async def crush(self, ctx: commands.Context, member: typing.Optional[discord.Member]):
         """Tell us who you have a crush on."""
         conf = await self._get_conf_group(ctx.guild)
         if not await conf.toggle():
@@ -635,8 +604,7 @@ price:: {data.get('price')}""",
             if await m_conf(member).married():
                 return await ctx.send("They're already married!")
         await ctx.send(
-            f"{ctx.author.mention} has asked {member.mention} to marry them!\n"
-            f"{member.mention}, what do you say?"
+            f"{ctx.author.mention} has asked {member.mention} to marry them!\n" f"{member.mention}, what do you say?"
         )
         pred = MessagePredicate.yes_or_no(ctx, ctx.channel, member)
         try:
@@ -652,30 +620,20 @@ price:: {data.get('price')}""",
         author_multiplier = author_marcount / 2 + 1
         target_multiplier = target_marcount / 2 + 1
 
-        multiplier = (
-            target_multiplier
-            if author_multiplier <= target_multiplier
-            else author_multiplier
-        )
-        amount = (
-            int(round(default_amount * multiplier))
-            if multiplier != 0
-            else int(round(default_amount))
-        )
+        multiplier = target_multiplier if author_multiplier <= target_multiplier else author_multiplier
+        amount = int(round(default_amount * multiplier)) if multiplier != 0 else int(round(default_amount))
         if await conf.currency() == 0:
             currency = await bank.get_currency_name(ctx.guild)
             end_amount = f"{amount} {currency}"
-            if not await bank.can_spend(ctx.author, amount) or not await bank.can_spend(
-                member, amount
-            ):
+            if not await bank.can_spend(ctx.author, amount) or not await bank.can_spend(member, amount):
                 return await ctx.send(f"Uh oh, you two cannot afford this...")
             await bank.withdraw_credits(ctx.author, amount)
             await bank.withdraw_credits(member, amount)
         else:
             end_amount = f"{amount} :cookie:"
-            if not await self._can_spend_cookies(
-                ctx.author, amount
-            ) or not await self._can_spend_cookies(member, amount):
+            if not await self._can_spend_cookies(ctx.author, amount) or not await self._can_spend_cookies(
+                member, amount
+            ):
                 return await ctx.send(f"Uh oh, you two cannot afford this...")
             await self._withdraw_cookies(ctx.author, amount)
             await self._withdraw_cookies(member, amount)
@@ -703,9 +661,7 @@ price:: {data.get('price')}""",
     @commands.max_concurrency(1, commands.BucketType.channel, wait=True)
     @commands.guild_only()
     @commands.command()
-    async def divorce(
-        self, ctx: commands.Context, member: discord.Member, court: bool = False
-    ):
+    async def divorce(self, ctx: commands.Context, member: discord.Member, court: bool = False):
         """Divorce your current spouse"""
         conf = await self._get_conf_group(ctx.guild)
         if not await conf.toggle():
@@ -731,11 +687,7 @@ price:: {data.get('price')}""",
                 author_multiplier = author_marcount / 2 + 1
                 target_multiplier = target_marcount / 2 + 1
 
-                multiplier = (
-                    target_multiplier
-                    if author_multiplier <= target_multiplier
-                    else author_multiplier
-                )
+                multiplier = target_multiplier if author_multiplier <= target_multiplier else author_multiplier
                 amount = (
                     int(round(default_amount * multiplier * default_multiplier))
                     if multiplier != 0
@@ -744,9 +696,7 @@ price:: {data.get('price')}""",
                 if await conf.currency() == 0:
                     currency = await bank.get_currency_name(ctx.guild)
                     end_amount = f"You both paid {amount} {currency}"
-                    if not await bank.can_spend(
-                        ctx.author, amount
-                    ) or not await bank.can_spend(member, amount):
+                    if not await bank.can_spend(ctx.author, amount) or not await bank.can_spend(member, amount):
                         return await ctx.send(
                             f"Uh oh, you two cannot afford this... But you can force a court by "
                             f"doing `{ctx.clean_prefix}divorce {member.mention} yes`"
@@ -755,9 +705,9 @@ price:: {data.get('price')}""",
                     await bank.withdraw_credits(member, amount)
                 else:
                     end_amount = f"You both paid {amount} :cookie:"
-                    if not await self._can_spend_cookies(
-                        ctx.author, amount
-                    ) or not await self._can_spend_cookies(member, amount):
+                    if not await self._can_spend_cookies(ctx.author, amount) or not await self._can_spend_cookies(
+                        member, amount
+                    ):
                         return await ctx.send(
                             f"Uh oh, you two cannot afford this... But you can force a court by "
                             f"doing `{ctx.clean_prefix}divorce {member.mention} yes`"
@@ -800,9 +750,7 @@ price:: {data.get('price')}""",
         if len(await m_conf(member).current()) == 0:
             await m_conf(member).married.clear()
             await m_conf(member).divorced.set(True)
-        await ctx.send(
-            f":broken_heart: {ctx.author.mention} and {member.mention} got divorced...\n*{end_amount}.*"
-        )
+        await ctx.send(f":broken_heart: {ctx.author.mention} and {member.mention} got divorced...\n*{end_amount}.*")
 
     @commands.max_concurrency(1, commands.BucketType.channel, wait=True)
     @commands.guild_only()
@@ -830,9 +778,7 @@ price:: {data.get('price')}""",
         exertion = await conf.custom_actions.get_raw(action, default=None)
         if not exertion:
             exertion = self._DEFAULT_ACTIONS.get(action)
-        endtext = exertion.get("description").format(
-            author=ctx.author.mention, target=member.mention
-        )
+        endtext = exertion.get("description").format(author=ctx.author.mention, target=member.mention)
 
         contentment, price = exertion.get("contentment"), exertion.get("price")
 
@@ -847,18 +793,12 @@ price:: {data.get('price')}""",
             await self._withdraw_cookies(ctx.author, price)
 
         if exertion.get("require_consent"):
-            await ctx.send(
-                exertion.get("consent_description").format(
-                    author=ctx.author.mention, target=member.mention
-                )
-            )
+            await ctx.send(exertion.get("consent_description").format(author=ctx.author.mention, target=member.mention))
             pred = MessagePredicate.yes_or_no(ctx, ctx.channel, member)
             try:
                 await self.bot.wait_for("message", timeout=60, check=pred)
             except asyncio.TimeoutError:
-                return await ctx.send(
-                    "They took too long. Try again later, please. (You didn't lose any contentment.)"
-                )
+                return await ctx.send("They took too long. Try again later, please. (You didn't lose any contentment.)")
             if pred.result:
                 t_temp = await m_conf(member).contentment()
                 t_missing = 100 - t_temp
@@ -874,9 +814,7 @@ price:: {data.get('price')}""",
                         await m_conf(ctx.author).contentment.set(a_temp + contentment)
                     else:
                         await m_conf(ctx.author).contentment.set(100)
-                endtext = exertion.get("description").format(
-                    author=ctx.author.mention, target=member.mention
-                )
+                endtext = exertion.get("description").format(author=ctx.author.mention, target=member.mention)
             else:
                 a_temp = await m_conf(ctx.author).contentment()
                 if contentment < a_temp:
@@ -902,11 +840,7 @@ price:: {data.get('price')}""",
         spouses = await m_conf(ctx.author).current()
         if member.id not in spouses and await m_conf(ctx.author).married():
             for sid in spouses:
-                spouse = (
-                    self.bot.get_user(sid)
-                    if await self.config.is_global()
-                    else ctx.guild.get_member(sid)
-                )
+                spouse = self.bot.get_user(sid) if await self.config.is_global() else ctx.guild.get_member(sid)
                 endtext = await self._maybe_divorce(ctx, spouse, endtext, contentment)
         await ctx.send(endtext)
 
@@ -937,9 +871,7 @@ price:: {data.get('price')}""",
             return await ctx.send(f"Available gifts are: {humanize_list(gifts)}")
 
         endtext_format = await conf.gift_text()
-        endtext = endtext_format.format(
-            author=ctx.author.mention, item=item, target=member.mention
-        )
+        endtext = endtext_format.format(author=ctx.author.mention, item=item, target=member.mention)
 
         author_gift = await m_conf(ctx.author).gifts.get_raw(item, default=0)
         member_gift = await m_conf(member).gifts.get_raw(item, default=0)
@@ -980,11 +912,7 @@ price:: {data.get('price')}""",
         spouses = await m_conf(ctx.author).current()
         if member.id not in spouses and await m_conf(ctx.author).married():
             for sid in spouses:
-                spouse = (
-                    self.bot.get_user(sid)
-                    if await self.config.is_global()
-                    else ctx.guild.get_member(sid)
-                )
+                spouse = self.bot.get_user(sid) if await self.config.is_global() else ctx.guild.get_member(sid)
                 endtext = await self._maybe_divorce(ctx, spouse, endtext, contentment)
         await ctx.send(endtext)
 
@@ -1089,16 +1017,10 @@ price:: {data.get('price')}""",
         return endtext
 
     async def _get_conf_group(self, guild):
-        return (
-            self.config if await self.config.is_global() else self.config.guild(guild)
-        )
+        return self.config if await self.config.is_global() else self.config.guild(guild)
 
     async def _get_user_conf(self, user):
-        return (
-            self.config.user(user)
-            if await self.config.is_global()
-            else self.config.member(user)
-        )
+        return self.config.user(user) if await self.config.is_global() else self.config.member(user)
 
     async def _get_user_conf_group(self):
         return self.config.user if await self.config.is_global() else self.config.member

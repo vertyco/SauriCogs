@@ -1,10 +1,9 @@
-import discord
+import datetime
 import random
 import typing
-import datetime
 
-from redbot.core import Config, checks, bank, commands
-
+import discord
+from redbot.core import Config, bank, checks, commands
 from redbot.core.bot import Red
 
 
@@ -17,9 +16,7 @@ class EconomyRaffle(commands.Cog):
 
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=5865146516515491, force_registration=True
-        )
+        self.config = Config.get_conf(self, identifier=5865146516515491, force_registration=True)
 
         self.config.register_guild(
             required_role=None,
@@ -42,9 +39,7 @@ class EconomyRaffle(commands.Cog):
         """Various Economy Raffle settings."""
 
     @economyraffleset.command(name="role")
-    async def economyraffleset_role(
-        self, ctx: commands.Context, *, role: typing.Optional[discord.Role]
-    ):
+    async def economyraffleset_role(self, ctx: commands.Context, *, role: typing.Optional[discord.Role]):
         """Set the required role to be in the raffle pool.
 
         If the role is not specified, no role is required."""
@@ -64,15 +59,11 @@ class EconomyRaffle(commands.Cog):
     async def economyraffleset_settings(self, ctx: commands.Context):
         """See current settings."""
         data = await self.config.guild(ctx.guild).all()
-        required_role = ctx.guild.get_role(
-            await self.config.guild(ctx.guild).required_role()
-        )
+        required_role = ctx.guild.get_role(await self.config.guild(ctx.guild).required_role())
         required_role = required_role.name if required_role else "None"
 
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__Economy Raffle settings:__**"
         embed.set_footer(text="*required to function properly")
 
@@ -94,11 +85,9 @@ class EconomyRaffle(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def economyraffle(self, ctx: commands.Context):
-        """ Give a a pre-set amount of economy to a random user in the guild/role."""
+        """Give a a pre-set amount of economy to a random user in the guild/role."""
         currency_name = await bank.get_currency_name(ctx.guild)
-        required_role = ctx.guild.get_role(
-            await self.config.guild(ctx.guild).required_role()
-        )
+        required_role = ctx.guild.get_role(await self.config.guild(ctx.guild).required_role())
         amount = await self.config.guild(ctx.guild).amount()
         message = await self.config.guild(ctx.guild).message()
 

@@ -1,10 +1,9 @@
-import discord
 import datetime
 import typing
 
+import discord
 from discord.utils import get
-
-from redbot.core import Config, commands, checks
+from redbot.core import Config, checks, commands
 
 
 class Forwarding(commands.Cog):
@@ -16,12 +15,8 @@ class Forwarding(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=5412156465899465526156, force_registration=True
-        )
-        self.config.register_global(
-            guild_id=0, channel_id=0, ping_role_id=0, ping_user_id=0
-        )
+        self.config = Config.get_conf(self, identifier=5412156465899465526156, force_registration=True)
+        self.config.register_global(guild_id=0, channel_id=0, ping_role_id=0, ping_user_id=0)
 
     async def red_delete_data_for_user(self, *, requester, user_id):
         for guild in self.bot.guilds:
@@ -73,7 +68,7 @@ class Forwarding(commands.Cog):
                 description=message.content,
                 timestamp=message.created_at,
             )
-            embed.set_author(name=message.author, icon_url=message.author.avatar_url)
+            embed.set_author(name=message.author, icon_url=message.author.display_avatar)
             embed.set_footer(text=f"User ID: {message.author.id}")
             await message.author.send("Message has been delivered.")
         else:
@@ -82,7 +77,7 @@ class Forwarding(commands.Cog):
                 description=message.content,
                 timestamp=message.created_at,
             )
-            embed.set_author(name=message.author, icon_url=message.author.avatar_url)
+            embed.set_author(name=message.author, icon_url=message.author.display_avatar)
             embed.set_image(url=message.attachments[0].url)
             embed.set_footer(text=f"User ID: {message.author.id}")
             await message.author.send(
@@ -121,9 +116,7 @@ class Forwarding(commands.Cog):
         """Various Forwarding settings."""
 
     @forwardset.command(name="channel")
-    async def forwardset_channel(
-        self, ctx: commands.Context, *, channel: typing.Optional[discord.TextChannel]
-    ):
+    async def forwardset_channel(self, ctx: commands.Context, *, channel: typing.Optional[discord.TextChannel]):
         """Set a channel in the current guild to be used for forwarding."""
         if channel:
             await self.config.guild_id.set(ctx.guild.id)
@@ -147,10 +140,7 @@ class Forwarding(commands.Cog):
                 await self.config.ping_role_id.set(ping.id)
             else:
                 await self.config.ping_user_id.set(ping.id)
-            await ctx.send(
-                f"I will ping {ping.name}.\n"
-                f"Remember to `{ctx.clean_prefix}forwardset channel`"
-            )
+            await ctx.send(f"I will ping {ping.name}.\n" f"Remember to `{ctx.clean_prefix}forwardset channel`")
         else:
             await self.config.ping_role_id.clear()
             await self.config.ping_user_id.clear()
@@ -170,10 +160,8 @@ class Forwarding(commands.Cog):
         user = ctx.guild.get_member(data["ping_user_id"])
         user = "None" if not user else user.name
 
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__Unique Name settings:__**"
         embed.set_footer(text="*required to function properly")
 

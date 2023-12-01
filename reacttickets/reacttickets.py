@@ -1,12 +1,11 @@
-import discord
+import asyncio
 import datetime
 import typing
-import asyncio
 
+import discord
 from redbot.core import Config, checks, commands
-from redbot.core.utils.predicates import MessagePredicate
-
 from redbot.core.bot import Red
+from redbot.core.utils.predicates import MessagePredicate
 
 
 class ReactTickets(commands.Cog):
@@ -20,9 +19,7 @@ class ReactTickets(commands.Cog):
         self.bot = bot
         self.enabled_cache = {}
 
-        self.config = Config.get_conf(
-            self, identifier=5465324654986213156, force_registration=False
-        )
+        self.config = Config.get_conf(self, identifier=5465324654986213156, force_registration=False)
 
         self.config.register_guild(
             enabled=None,
@@ -99,17 +96,13 @@ class ReactTickets(commands.Cog):
         """Various ReactTickets settings."""
 
     @ticketset.command(name="channel")
-    async def ticketset_channel(
-        self, ctx: commands.Context, channel: discord.TextChannel
-    ):
+    async def ticketset_channel(self, ctx: commands.Context, channel: discord.TextChannel):
         """Set the support-request channel."""
         await self.config.guild(ctx.guild).request_channel.set(channel.id)
         await ctx.send(f"Channel has been set to {channel.mention}.")
 
     @ticketset.command(name="management")
-    async def ticketset_management(
-        self, ctx: commands.Context, channel: discord.TextChannel
-    ):
+    async def ticketset_management(self, ctx: commands.Context, channel: discord.TextChannel):
         """Set the support-management channel."""
         await self.config.guild(ctx.guild).channel.set(channel.id)
         await ctx.send(f"Channel has been set to {channel.mention}.")
@@ -125,36 +118,26 @@ class ReactTickets(commands.Cog):
         """Set the ticket categories."""
 
     @ticketset_category.command(name="open")
-    async def ticketset_category_open(
-        self, ctx: commands.Context, *, category: discord.CategoryChannel
-    ):
+    async def ticketset_category_open(self, ctx: commands.Context, *, category: discord.CategoryChannel):
         """Set the category for open tickets."""
         await self.config.guild(ctx.guild).open_category.set(category.id)
         await ctx.send(f"Category for open tickets has been set to {category.mention}")
 
     @ticketset_category.command(name="closed")
-    async def ticketset_category_closed(
-        self, ctx: commands.Context, *, category: discord.CategoryChannel
-    ):
+    async def ticketset_category_closed(self, ctx: commands.Context, *, category: discord.CategoryChannel):
         """Set the category for closed tickets."""
         await self.config.guild(ctx.guild).closed_category.set(category.id)
-        await ctx.send(
-            f"Category for closed tickets has been set to {category.mention}"
-        )
+        await ctx.send(f"Category for closed tickets has been set to {category.mention}")
 
     @ticketset.group(name="case")
     async def ticketset_case(self, ctx: commands.Context):
         """Set the ticket cases."""
 
     @ticketset_case.command(name="add")
-    async def ticketset_case_add(
-        self, ctx: commands.Context, emoji: typing.Union[discord.Emoji, str]
-    ):
+    async def ticketset_case_add(self, ctx: commands.Context, emoji: typing.Union[discord.Emoji, str]):
         """Add a support case type."""
         if await self.config.guild(ctx.guild).enabled():
-            return await ctx.send(
-                "Uh oh, you cannot add nor remove cases while support is enabled."
-            )
+            return await ctx.send("Uh oh, you cannot add nor remove cases while support is enabled.")
         cases = await self.config.guild(ctx.guild).cases.get_raw()
         try:
             if cases[emoji]:
@@ -167,34 +150,22 @@ class ReactTickets(commands.Cog):
             return await ctx.send("Uh oh, I cannot use that emoji.")
         await ctx.send("What is the title of this case? (e.g. Role change requested)")
         try:
-            title = await self.bot.wait_for(
-                "message", timeout=60, check=MessagePredicate.same_context(ctx)
-            )
+            title = await self.bot.wait_for("message", timeout=60, check=MessagePredicate.same_context(ctx))
         except asyncio.TimeoutError:
             return await ctx.send("You took too long.")
-        await ctx.send(
-            "What's the message in the reaction message? (e.g. to request a role change)"
-        )
+        await ctx.send("What's the message in the reaction message? (e.g. to request a role change)")
         try:
-            desc = await self.bot.wait_for(
-                "message", timeout=60, check=MessagePredicate.same_context(ctx)
-            )
+            desc = await self.bot.wait_for("message", timeout=60, check=MessagePredicate.same_context(ctx))
         except asyncio.TimeoutError:
             return await ctx.send("You took too long.")
-        await self.config.guild(ctx.guild).cases.set_raw(
-            emoji, value={"title": title.content, "desc": desc.content}
-        )
+        await self.config.guild(ctx.guild).cases.set_raw(emoji, value={"title": title.content, "desc": desc.content})
         await ctx.send(f"{title.content} was assigned to {emoji}.")
 
     @ticketset_case.command(name="del")
-    async def ticketset_case_del(
-        self, ctx: commands.Context, emoji: typing.Union[discord.Emoji, str]
-    ):
+    async def ticketset_case_del(self, ctx: commands.Context, emoji: typing.Union[discord.Emoji, str]):
         """Remove a support case type."""
         if await self.config.guild(ctx.guild).enabled():
-            return await ctx.send(
-                "Uh oh, you cannot add nor remove cases while support is enabled."
-            )
+            return await ctx.send("Uh oh, you cannot add nor remove cases while support is enabled.")
         try:
             if not await self.config.guild(ctx.guild).cases.get_raw(emoji):
                 return await ctx.send("Uh oh, that emoji is not registered.")
@@ -226,9 +197,7 @@ class ReactTickets(commands.Cog):
             pass
 
         cases = await self.config.guild(ctx.guild).cases.get_raw()
-        description = self._get_cases_string(
-            cases, "React below with the reaction based on what you want.\n"
-        )
+        description = self._get_cases_string(cases, "React below with the reaction based on what you want.\n")
 
         embed = discord.Embed(
             colour=await ctx.embed_colour(),
@@ -286,10 +255,8 @@ class ReactTickets(commands.Cog):
         support_role = ctx.guild.get_role(data["role"])
         support_role = support_role.name if support_role else "None"
 
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__Reaction Tickets settings:__**"
         embed.set_footer(text="*required to function properly")
 
@@ -307,9 +274,7 @@ class ReactTickets(commands.Cog):
         await ctx.send(embed=embed)
 
     @ticketset.command(name="reset")
-    async def ticketset_reset(
-        self, ctx: commands.Context, confirmation: typing.Optional[bool]
-    ):
+    async def ticketset_reset(self, ctx: commands.Context, confirmation: typing.Optional[bool]):
         """Erase all data and settings."""
         if not confirmation:
             return await ctx.send(
@@ -320,9 +285,7 @@ class ReactTickets(commands.Cog):
         await ctx.tick()
 
     @ticketset.command(name="purge")
-    async def ticketset_purge(
-        self, ctx: commands.Context, confirmation: typing.Optional[bool]
-    ):
+    async def ticketset_purge(self, ctx: commands.Context, confirmation: typing.Optional[bool]):
         """Deletes all closed ticket channels."""
         if not confirmation:
             return await ctx.send(
@@ -355,18 +318,12 @@ class ReactTickets(commands.Cog):
             manager_msg = await channel.fetch_message(msg_id)
         except discord.NotFound:
             return await ctx.send("Ticket not found.")
-        await self._edit_manager_msg(
-            manager_msg, f"Note", False, note + f"\nby {ctx.author.mention}"
-        )
+        await self._edit_manager_msg(manager_msg, f"Note", False, note + f"\nby {ctx.author.mention}")
         await ctx.tick()
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if (
-            payload.user_id == self.bot.user.id
-            or not payload.guild_id
-            or payload.guild_id not in self.enabled_cache
-        ):
+        if payload.user_id == self.bot.user.id or not payload.guild_id or payload.guild_id not in self.enabled_cache:
             return
 
         guild = self.bot.get_guild(payload.guild_id)
@@ -384,9 +341,7 @@ class ReactTickets(commands.Cog):
             await self._open_ticket(channel, guild, str(payload.emoji), user, settings)
         if channel.id in settings["active_channels"]:
             await message.remove_reaction(payload.emoji, user)
-            await self._in_active_support(
-                message, channel, guild, str(payload.emoji), user, settings
-            )
+            await self._in_active_support(message, channel, guild, str(payload.emoji), user, settings)
 
     async def _add_reactions(self, message: discord.Message, emoji_list: list):
         for e in emoji_list:
@@ -408,10 +363,7 @@ class ReactTickets(commands.Cog):
             return await channel.send("Invalid reaction.", delete_after=5)
         reason = cases[emoji]["title"]
 
-        found = any(
-            channel.name in [f"open-{user.id}", f"assigned-{user.id}"]
-            for channel in category.channels
-        )
+        found = any(channel.name in [f"open-{user.id}", f"assigned-{user.id}"] for channel in category.channels)
 
         if not found:
             overwrite = {
@@ -444,7 +396,7 @@ class ReactTickets(commands.Cog):
                 description="To close this ticket, react with 🔒 below.",
                 timestamp=datetime.datetime.utcnow(),
             )
-            embed.set_thumbnail(url=user.avatar_url)
+            embed.set_thumbnail(url=user.display_avatar)
             embed.set_footer(text=f"{user.name}#{user.discriminator} ({user.id})")
             embed_user_message = await user_channel.send(
                 content=f"{user.mention}, a staff member will be with you shortly.",
@@ -457,7 +409,7 @@ class ReactTickets(commands.Cog):
                 description=reason,
                 timestamp=datetime.datetime.utcnow(),
             )
-            embed.set_thumbnail(url=user.avatar_url)
+            embed.set_thumbnail(url=user.display_avatar)
             manager_msg = await guild.get_channel(settings["channel"]).send(
                 content=f"User: {user.mention}\nChannel: {user_channel.mention}",
                 embed=embed,
@@ -488,22 +440,16 @@ class ReactTickets(commands.Cog):
             target = await guild.fetch_member(target_id)
         except discord.NotFound:
             target = None
-        manager_msg = await guild.get_channel(settings["channel"]).fetch_message(
-            settings["active_msgs"][index]
-        )
+        manager_msg = await guild.get_channel(settings["channel"]).fetch_message(settings["active_msgs"][index])
 
         if not target:
             await channel.send("User has left the guild. Close this ticket, please.")
 
         if emoji == "🔒":
             if not target:
-                await self._edit_manager_msg(
-                    manager_msg, "Closed", True, f"(user has left) by {user.mention}"
-                )
+                await self._edit_manager_msg(manager_msg, "Closed", True, f"(user has left) by {user.mention}")
             else:
-                await self._edit_manager_msg(
-                    manager_msg, "Closed", True, f"by {user.mention}"
-                )
+                await self._edit_manager_msg(manager_msg, "Closed", True, f"by {user.mention}")
 
             async with self.config.guild(guild).closed() as closed:
                 closed.append(channel.id)
@@ -519,9 +465,7 @@ class ReactTickets(commands.Cog):
                 category=guild.get_channel(settings["closed_category"]),
                 name=f"closed-{target.id}",
                 overwrites={
-                    guild.default_role: discord.PermissionOverwrite(
-                        read_messages=False
-                    ),
+                    guild.default_role: discord.PermissionOverwrite(read_messages=False),
                     guild.get_role(settings["role"]): discord.PermissionOverwrite(
                         read_messages=True,
                         send_messages=True,
@@ -537,16 +481,12 @@ class ReactTickets(commands.Cog):
             if channel.name != f"open-{target.id}":
                 return
             await channel.edit(name=f"assigned-{target.id}", reason="Ticket assigned")
-            await self._edit_manager_msg(
-                manager_msg, "Assigned", True, f"to {user.mention}"
-            )
+            await self._edit_manager_msg(manager_msg, "Assigned", True, f"to {user.mention}")
             await channel.send(f"This ticket has been assigned to {user.mention}.")
         else:
             await channel.send("Invalid reaction.", delete_after=5)
 
-    async def _edit_manager_msg(
-        self, message: discord.Message, state: str, inline: bool, text: str
-    ):
+    async def _edit_manager_msg(self, message: discord.Message, state: str, inline: bool, text: str):
         embed = message.embeds[0]
         value = f"{text} at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         embed.add_field(name=state, value=value, inline=inline)

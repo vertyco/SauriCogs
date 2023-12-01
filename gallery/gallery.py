@@ -18,9 +18,7 @@ class Gallery(commands.Cog):
 
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=564154651321346431, force_registration=True
-        )
+        self.config = Config.get_conf(self, identifier=564154651321346431, force_registration=True)
 
         self.config.register_guild(channels=[], whitelist=None, time=0)
 
@@ -45,32 +43,22 @@ class Gallery(commands.Cog):
         if channel.id not in await self.config.guild(ctx.guild).channels():
             async with self.config.guild(ctx.guild).channels() as channels:
                 channels.append(channel.id)
-            await ctx.send(
-                f"{channel.mention} has been added into the Gallery channels list."
-            )
+            await ctx.send(f"{channel.mention} has been added into the Gallery channels list.")
         else:
-            await ctx.send(
-                f"{channel.mention} is already in the Gallery channels list."
-            )
+            await ctx.send(f"{channel.mention} is already in the Gallery channels list.")
 
     @galleryset.command(name="remove")
-    async def galleryset_remove(
-        self, ctx: commands.Context, channel: discord.TextChannel
-    ):
+    async def galleryset_remove(self, ctx: commands.Context, channel: discord.TextChannel):
         """Remove a channel from the list of Gallery channels."""
         if channel.id in await self.config.guild(ctx.guild).channels():
             async with self.config.guild(ctx.guild).channels() as channels:
                 channels.remove(channel.id)
-            await ctx.send(
-                f"{channel.mention} has been removed from the Gallery channels list."
-            )
+            await ctx.send(f"{channel.mention} has been removed from the Gallery channels list.")
         else:
             await ctx.send(f"{channel.mention} isn't in the Gallery channels list.")
 
     @galleryset.command(name="role")
-    async def galleryset_role(
-        self, ctx: commands.Context, role: typing.Optional[discord.Role]
-    ):
+    async def galleryset_role(self, ctx: commands.Context, role: typing.Optional[discord.Role]):
         """Add or remove a whitelisted role."""
         if not role:
             await self.config.guild(ctx.guild).whitelist.clear()
@@ -85,9 +73,7 @@ class Gallery(commands.Cog):
 
         0 to reset (default time)"""
         await self.config.guild(ctx.guild).time.set(time)
-        await ctx.send(
-            f"I will wait {time} seconds before deleting messages that are not images."
-        )
+        await ctx.send(f"I will wait {time} seconds before deleting messages that are not images.")
 
     @galleryset.command(name="settings")
     async def galleryset_settings(self, ctx: commands.Context):
@@ -104,10 +90,8 @@ class Gallery(commands.Cog):
         role = ctx.guild.get_role(data["whitelist"])
         role = "None" if not role else role.name
 
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__Unique Name settings:__**"
         embed.set_footer(text="*required to function properly")
 

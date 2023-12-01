@@ -1,9 +1,8 @@
 import datetime
-import discord
 import typing
 
-from redbot.core import checks, commands, Config
-
+import discord
+from redbot.core import Config, checks, commands
 from redbot.core.bot import Red
 
 
@@ -16,9 +15,7 @@ class UserLog(commands.Cog):
 
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=56546565165465456, force_registration=True
-        )
+        self.config = Config.get_conf(self, identifier=56546565165465456, force_registration=True)
 
         self.config.register_guild(channel=None, join=True, leave=True)
 
@@ -37,9 +34,7 @@ class UserLog(commands.Cog):
         """Various User Log settings."""
 
     @userlogset.command(name="channel")
-    async def user_channel_log(
-        self, ctx: commands.Context, channel: typing.Optional[discord.TextChannel]
-    ):
+    async def user_channel_log(self, ctx: commands.Context, channel: typing.Optional[discord.TextChannel]):
         """Set the channel for logs.
 
         If the channel is not provided, logging will be disabled."""
@@ -62,9 +57,7 @@ class UserLog(commands.Cog):
             await ctx.send("Logging users joining is now disabled.")
 
     @userlogset.command(name="leave")
-    async def user_leave_log(
-        self, ctx: commands.Context, on_off: typing.Optional[bool]
-    ):
+    async def user_leave_log(self, ctx: commands.Context, on_off: typing.Optional[bool]):
         """Toggle logging when users leave the current server.
 
         If `on_off` is not provided, the state will be flipped."""
@@ -81,10 +74,8 @@ class UserLog(commands.Cog):
         data = await self.config.guild(ctx.guild).all()
         channel = ctx.guild.get_channel(await self.config.guild(ctx.guild).channel())
         channel = "None" if not channel else channel.mention
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__User Log settings:__**"
 
         embed.set_footer(text="*required to function properly")
@@ -99,9 +90,7 @@ class UserLog(commands.Cog):
         join = await self.config.guild(member.guild).join()
         if not join:
             return
-        channel = member.guild.get_channel(
-            await self.config.guild(member.guild).channel()
-        )
+        channel = member.guild.get_channel(await self.config.guild(member.guild).channel())
         if not channel:
             return
         time = datetime.datetime.utcnow()
@@ -121,10 +110,10 @@ class UserLog(commands.Cog):
         embed.set_footer(text=f"User ID: {member.id}")
         embed.set_author(
             name=f"{member.name} has joined the guild",
-            url=member.avatar_url,
-            icon_url=member.avatar_url,
+            url=member.display_avatar,
+            icon_url=member.display_avatar,
         )
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.display_avatar)
         await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -132,9 +121,7 @@ class UserLog(commands.Cog):
         leave = await self.config.guild(member.guild).leave()
         if not leave:
             return
-        channel = member.guild.get_channel(
-            await self.config.guild(member.guild).channel()
-        )
+        channel = member.guild.get_channel(await self.config.guild(member.guild).channel())
         if not channel:
             return
         time = datetime.datetime.utcnow()
@@ -148,8 +135,8 @@ class UserLog(commands.Cog):
         embed.set_footer(text=f"User ID: {member.id}")
         embed.set_author(
             name=f"{member.name} has left the guild",
-            url=member.avatar_url,
-            icon_url=member.avatar_url,
+            url=member.display_avatar,
+            icon_url=member.display_avatar,
         )
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.display_avatar)
         await channel.send(embed=embed)

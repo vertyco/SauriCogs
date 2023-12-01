@@ -1,9 +1,8 @@
 import asyncio
-import discord
 import datetime
 
+import discord
 from redbot.core import Config, checks, commands
-
 from redbot.core.bot import Red
 
 
@@ -16,9 +15,7 @@ class Pingable(commands.Cog):
 
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=145645641644623, force_registration=True
-        )
+        self.config = Config.get_conf(self, identifier=145645641644623, force_registration=True)
 
         self.config.register_role(pingable=False, channel=None)
 
@@ -52,9 +49,7 @@ class Pingable(commands.Cog):
         await ctx.send(f"{role.name} removed from the pingable roles.")
 
     @pingableset.command(name="pingin")
-    async def pingableset_pingin(
-        self, ctx: commands.Context, role: discord.Role, channel: discord.TextChannel
-    ):
+    async def pingableset_pingin(self, ctx: commands.Context, role: discord.Role, channel: discord.TextChannel):
         """Make a role pinable in a specified channel only."""
         await self.config.role(role).pingable.set(True)
         await self.config.role(role).channel.set(channel.id)
@@ -79,10 +74,8 @@ class Pingable(commands.Cog):
         if roles_nochannel == "":
             roles_nochannel = "None"
 
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__Pingable settings:__**"
         embed.set_footer(text="*required to function properly")
 
@@ -103,16 +96,11 @@ class Pingable(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True)
-    async def pingable(
-        self, ctx: commands.Context, role: discord.Role, *, message: str
-    ):
+    async def pingable(self, ctx: commands.Context, role: discord.Role, *, message: str):
         """Ping a role."""
         if not await self.config.role(role).pingable():
             return
-        if (
-            await self.config.role(role).channel()
-            and await self.config.role(role).channel() != ctx.channel.id
-        ):
+        if await self.config.role(role).channel() and await self.config.role(role).channel() != ctx.channel.id:
             return
         await ctx.message.delete()
         await role.edit(mentionable=True)

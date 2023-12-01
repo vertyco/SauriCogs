@@ -1,13 +1,11 @@
-import discord
-
-from pymongo import MongoClient
 from datetime import datetime
 
+import discord
+from pymongo import MongoClient
 from redbot.core import Config, checks, commands
-from redbot.core.utils.chat_formatting import pagify
-from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
-
 from redbot.core.bot import Red
+from redbot.core.utils.chat_formatting import pagify
+from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 
 client = MongoClient()
 db = client["leveler"]
@@ -22,9 +20,7 @@ class LevelUpCookies(commands.Cog):
 
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=646548484121544, force_registration=True
-        )
+        self.config = Config.get_conf(self, identifier=646548484121544, force_registration=True)
         self.config.register_guild(rewards={})
 
     async def red_delete_data_for_user(self, *, requester, user_id):
@@ -42,13 +38,9 @@ class LevelUpCookies(commands.Cog):
         """Various Level Up Cookies settings."""
 
     @levelupcookiesset.command(name="add")
-    async def levelupcookiesset_add(
-        self, ctx: commands.Context, level: int, cookies: int
-    ):
+    async def levelupcookiesset_add(self, ctx: commands.Context, level: int, cookies: int):
         """Set a cookie reward for leveling up!"""
-        await self.config.guild(ctx.guild).rewards.set_raw(
-            level, value={"cookies": cookies}
-        )
+        await self.config.guild(ctx.guild).rewards.set_raw(level, value={"cookies": cookies})
         await ctx.send(f"Gaining {level} will now give {cookies} :cookie:")
 
     @levelupcookiesset.command(name="del")
@@ -77,7 +69,7 @@ class LevelUpCookies(commands.Cog):
             )
             embed.set_author(
                 name=f"Cookie rewards for {ctx.guild.name}",
-                icon_url=ctx.guild.icon_url,
+                icon_url=ctx.guild.icon,
             )
             page_list.append(embed)
         await menu(ctx, page_list, DEFAULT_CONTROLS)

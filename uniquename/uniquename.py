@@ -1,7 +1,7 @@
-import discord
 import datetime
 import typing
 
+import discord
 from redbot.core import Config, checks, commands
 from redbot.core.utils.chat_formatting import humanize_list
 
@@ -15,13 +15,9 @@ class UniqueName(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(
-            self, identifier=58462132145646132, force_registration=True
-        )
+        self.config = Config.get_conf(self, identifier=58462132145646132, force_registration=True)
 
-        self.config.register_guild(
-            toggle=False, roles=[], name="username", channel=None
-        )
+        self.config.register_guild(toggle=False, roles=[], name="username", channel=None)
         self.config.register_global(guilds=[])
 
     async def red_delete_data_for_user(self, *, requester, user_id):
@@ -68,9 +64,7 @@ class UniqueName(commands.Cog):
         await ctx.send(f"List of roles that are protected:\n{pretty_roles}")
 
     @uniquenameset.command(name="channel")
-    async def unset_channel(
-        self, ctx: commands.Context, channel: typing.Optional[discord.TextChannel]
-    ):
+    async def unset_channel(self, ctx: commands.Context, channel: typing.Optional[discord.TextChannel]):
         """Set the channel for warnings.
 
         If the channel is not provided, logging will be disabled."""
@@ -117,10 +111,8 @@ class UniqueName(commands.Cog):
                     roles.append(role.name)
             roles = humanize_list(roles)
 
-        embed = discord.Embed(
-            colour=await ctx.embed_colour(), timestamp=datetime.datetime.now()
-        )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed = discord.Embed(colour=await ctx.embed_colour(), timestamp=datetime.datetime.now())
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
         embed.title = "**__Unique Name settings:__**"
         embed.set_footer(text="*required to function properly")
 
@@ -144,9 +136,7 @@ class UniqueName(commands.Cog):
                     return
         names = await self._build_name_list(before.guild)
         name = await self.config.guild(before.guild).name()
-        channel = before.guild.get_channel(
-            await self.config.guild(before.guild).channel()
-        )
+        channel = before.guild.get_channel(await self.config.guild(before.guild).channel())
         if not after.nick:
             return
         if after.nick not in names:
